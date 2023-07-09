@@ -34,7 +34,14 @@ class FormWidget extends StatefulWidget {
   // The index of the item in the box, if editing
   final int? index;
 
-  const FormWidget({Key? key, required this.box, this.item, this.index})
+  final VoidCallback onUpdate;
+
+  const FormWidget(
+      {Key? key,
+      required this.box,
+      this.item,
+      this.index,
+      required this.onUpdate})
       : super(key: key);
 
   @override
@@ -63,6 +70,7 @@ class _FormWidgetState extends State<FormWidget> {
     var item = Item(name, quantity);
     widget.box.add(item.toMap());
     Navigator.pop(context);
+    widget.onUpdate();
   }
 
   // Update an existing item in the box

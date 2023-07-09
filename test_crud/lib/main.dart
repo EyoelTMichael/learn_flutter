@@ -4,25 +4,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'data/quality_form.dart';
 
 // Define a model class for the data
-class Item {
-  final String name;
-  final int quantity;
-
-  Item(this.name, this.quantity);
-
-  // Convert an item to a map
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'quantity': quantity,
-    };
-  }
-
-  // Convert a map to an item
-  Item.fromMap(Map<String, dynamic> map)
-      : name = map['name'],
-        quantity = map['quantity'];
-}
 
 void main() async {
   // Initialize hive and open a box
@@ -64,13 +45,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // The list of items
   List<Item> items = [];
-
-  // The controller for the name input field
-  TextEditingController nameController = TextEditingController();
-
-  // The controller for the quantity input field
-  TextEditingController quantityController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -81,25 +55,17 @@ class _MyHomePageState extends State<MyHomePage> {
   // Load the items from the box
   void loadItems() {
     setState(() {
-      items = widget.box.values.map((e) => Item.fromMap(e)).toList();
+      items = widget.box.values
+          .map((e) => Item.fromMap(Map<String, dynamic>.from(e)))
+          .toList();
     });
   }
 
-  // Add a new item to the box and the list
-  void addItem(String name, int quantity) {
-    var item = Item(name, quantity);
-    widget.box.add(item.toMap());
+  void updateItems() {
     setState(() {
-      items.add(item);
-    });
-  }
-
-  // Update an existing item in the box and the list
-  void updateItem(int index, String name, int quantity) {
-    var item = Item(name, quantity);
-    widget.box.putAt(index, item.toMap());
-    setState(() {
-      items[index] = item;
+      items = widget.box.values
+          .map((e) => Item.fromMap(Map<String, dynamic>.from(e)))
+          .toList();
     });
   }
 
@@ -116,18 +82,16 @@ class _MyHomePageState extends State<MyHomePage> {
     // If index is not null, it means we are editing an existing item
     bool isEditing = index != null;
 
-    var item = isEditing ? items[index!] : null;
+    Item? item = isEditing ? items[index!] : null;
     // Set the initial values of the input fields
-    nameController.text = isEditing ? items[index!].name : '';
-    quantityController.text =
-        isEditing ? items[index!].quantity.toString() : '';
 
     // Show the bottom sheet
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         builder: (context) {
-          return FormWidget(box: widget.box, item: item, index: index);
+          return FormWidget(
+              box: widget.box, item: item, index: index, onUpdate: updateItems);
         });
   }
 
@@ -136,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text('Flutter CRUD App'),
+        title: const Text('Flutter CRUD App'),
       ),
       body: ListView.builder(
         itemCount: items.length,
@@ -154,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     // Show the bottom sheet to edit the item
                     showBottomSheet(context, index: index);
                   },
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                 ),
                 IconButton(
                   onPressed: () {
@@ -173,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // Show the bottom sheet to add a new item
           showBottomSheet(context);
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
